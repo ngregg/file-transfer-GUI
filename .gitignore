@@ -1,0 +1,5 @@
+.vscode/
+PDF_Finder.py
+__pycache__/
+tkUI.py
+venv/

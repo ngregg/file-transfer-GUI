@@ -11,7 +11,7 @@ import os
 import xlrd
 from shutil import copyfile
 import tkinter as tk
-from tkinter import Label, Button, Text, filedialog
+from tkinter import Frame, Label, Button, Text, filedialog, Menu
 
 
 class MainApp(tk.Tk):
@@ -22,6 +22,27 @@ class MainApp(tk.Tk):
         self.main_win.resizable(0, 0)
         self.main_win.configure(bg="#303030")
         self.main_win.title("File Transfer App")
+
+        # Menu Bar
+        self.menubar = Menu(self.main_win)
+        self.main_win.config(menu=self.menubar)
+
+        # File menu
+        fileMenu = Menu(self.menubar, tearoff=0)
+        self.menubar.add_cascade(label="File", menu=fileMenu)
+
+        fileMenu.add_command(label="New", command=None)
+        fileMenu.add_separator()
+        fileMenu.add_command(label="Exit", command=None)
+
+        # Settings menu
+        settingsMenu = Menu(self.menubar, tearoff=0)
+        self.menubar.add_cascade(label="Settings", menu=settingsMenu)
+
+        settingsMenu.add_command(label="Output Location", command=None)
+
+        # Help menu
+        self.menubar.add_command(label="Help", command=self.help_menu)
 
         # Labels
         self.fin_label = Label(self.main_win, text="Input File", bg="#303030",
@@ -50,10 +71,8 @@ class MainApp(tk.Tk):
         self.fout_button.place(x=450, y=88)
         self.run_button = Button(self.main_win, command=self.run_click, width=8, text="Run", bg="#353535",
                                  fg="white", activebackground="#404040", activeforeground="#808080")
-        self.run_button.place(x=200, y=130)
-        self.help_button = Button(self.main_win, command=self.help_click, width=8, text="Help", bg="#353535",
-                                  fg="white", activebackground="#404040", activeforeground="#808080")
-        self.help_button.place(x=280, y=130)
+        # self.run_button.place(x=200, y=130)
+        self.run_button.pack(side="bottom", pady=10)
 
     # File search when input file browse button is clicked
 
@@ -61,7 +80,6 @@ class MainApp(tk.Tk):
         self.fin_clicked = filedialog.askopenfilename()
         self.fin_text.delete(1.0, 2.0)
         self.fin_text.insert(1.0, self.fin_clicked)
-        print(self.fin_clicked)
 
     def fout_click(self):
         self.fout_clicked = filedialog.askdirectory()
@@ -86,8 +104,7 @@ class MainApp(tk.Tk):
         # If match found, copy file to new folder on desktop.
         # TODO: Add settings menu to allow change for source directory.
         src = "\\\\andros-dc\\groups\\ENG DATA\\ENG_Directory\\Attachments_Genius\\"
-        dst = self.fout_path.rstrip()
-        dst += "\\"
+        dst = self.fout_path.rstrip() + "\\"
 
         for fname in os.listdir(src):
             for partno in part_numbers:
@@ -95,7 +112,7 @@ class MainApp(tk.Tk):
                     copyfile(src + fname, dst + fname)
 
     # Application instructions pop-up window.
-    def help_click(self):
+    def help_menu(self):
         pass
 
 

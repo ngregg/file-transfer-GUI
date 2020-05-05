@@ -10,36 +10,42 @@
 import os
 import xlrd
 from shutil import copyfile
+from zipfile import ZipFile
 import tkinter as tk
 from tkinter import Frame, Label, Button, Text, filedialog, Menu
+from tkinter.messagebox import showinfo
 
 
 class MainApp(tk.Tk):
     def __init__(self, main_win):
         # Main window
         self.main_win = main_win
-        self.main_win.geometry("530x170+500+350")
+        self.main_win.geometry("530x190+500+350")
         self.main_win.resizable(0, 0)
         self.main_win.configure(bg="#303030")
-        self.main_win.title("File Transfer App")
+        self.main_win.title("PDF Transfer App")
 
         # Menu Bar
         self.menubar = Menu(self.main_win)
         self.main_win.config(menu=self.menubar)
 
         # File menu
-        fileMenu = Menu(self.menubar, tearoff=0)
-        self.menubar.add_cascade(label="File", menu=fileMenu)
+        file_menu = Menu(self.menubar, tearoff=0)
+        self.menubar.add_cascade(label="File", menu=file_menu)
 
-        fileMenu.add_command(label="New", command=None)
-        fileMenu.add_separator()
-        fileMenu.add_command(label="Exit", command=None)
+        file_menu.add_command(label="New", command=self.new)
+        file_menu.add_separator()
+        file_menu.add_command(label="Exit", command=main_win.quit)
 
         # Settings menu
-        settingsMenu = Menu(self.menubar, tearoff=0)
-        self.menubar.add_cascade(label="Settings", menu=settingsMenu)
+        settings_menu = Menu(self.menubar, tearoff=0)
+        self.menubar.add_cascade(label="Settings", menu=settings_menu)
 
-        settingsMenu.add_command(label="Output Location", command=None)
+        settings_menu.add_command(
+            label="Search Location", command=self.search_dir)
+
+        # Default search directory
+        self.src = "\\\\andros-dc\\groups\\ENG DATA\\ENG_Directory\\Attachments_Genius\\"
 
         # Help menu
         self.menubar.add_command(label="Help", command=self.help_menu)
@@ -51,6 +57,10 @@ class MainApp(tk.Tk):
         self.fout_label = Label(self.main_win, text="Output Folder", bg="#303030",
                                 fg="white")
         self.fout_label.place(x=15, y=70)
+
+        self.search_label = Label(
+            self.main_win, text="Searching: " + self.src, bg="#303030", fg="white")
+        self.search_label.place(x=15, y=125)
 
         # Text fields
         self.fin_text = Text(self.main_win, width=52, height=1,
@@ -78,13 +88,21 @@ class MainApp(tk.Tk):
 
     def fin_click(self):
         self.fin_clicked = filedialog.askopenfilename()
-        self.fin_text.delete(1.0, 2.0)
-        self.fin_text.insert(1.0, self.fin_clicked)
+
+        if self.fin_clicked == '':
+            pass
+        else:
+            self.fin_text.delete(1.0, 2.0)
+            self.fin_text.insert(1.0, self.fin_clicked)
 
     def fout_click(self):
         self.fout_clicked = filedialog.askdirectory()
-        self.fout_text.delete(1.0, 2.0)
-        self.fout_text.insert(1.0, self.fout_clicked)
+
+        if self.fout_clicked == '':
+            pass
+        else:
+            self.fout_text.delete(1.0, 2.0)
+            self.fout_text.insert(1.0, self.fout_clicked)
 
     def run_click(self):
         self.fin_path = self.fin_text.get(1.0, 2.0)
@@ -101,22 +119,41 @@ class MainApp(tk.Tk):
             part_numbers[part_numbers.index(i)] += ".PDF"
 
         # Search folder for matching names.
-        # If match found, copy file to new folder on desktop.
-        # TODO: Add settings menu to allow change for source directory.
-        src = "\\\\andros-dc\\groups\\ENG DATA\\ENG_Directory\\Attachments_Genius\\"
+        # If match found, copy file to new zip folder.
         dst = self.fout_path.rstrip() + "\\"
 
-        for fname in os.listdir(src):
+        for fname in os.listdir(self.src):
             for partno in part_numbers:
                 if fname.upper() == partno.upper():
-                    copyfile(src + fname, dst + fname)
+                    copyfile(self.src + fname, dst + fname)
+
+    # Reset file selections.
+
+    def new(self):
+        self.fin_text.delete(1.0, 2.0)
+        self.fin_text.insert(1.0, "Select a file")
+        self.fout_text.delete(1.0, 2.0)
+        self.fout_text.insert(1.0, "Select a Folder")
+        self.src = "\\\\andros-dc\\groups\\ENG DATA\\ENG_Directory\\Attachments_Genius\\"
+        self.search_label.config(text="Searching: " + self.src)
+
+    def search_dir(self):
+        self.search_dir_clicked = filedialog.askdirectory()
+
+        if self.search_dir_clicked == '':
+            pass
+        else:
+            self.src = self.search_dir_clicked.rstrip() + "/"
+            self.search_label.config(text="Searching: " + self.src)
 
     # Application instructions pop-up window.
-    def help_menu(self):
-        pass
 
+    def help_menu(self):
+        Instructions = "Insert instructions."
+        showinfo("Help", Instructions)
 
 # Run program
+
 
 def main():
     root = tk.Tk()

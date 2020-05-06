@@ -10,8 +10,8 @@
 import os
 from os.path import basename
 import xlrd
-from shutil import copyfile
-import zipfile
+import zipfile as z
+from textwrap import dedent
 import tkinter as tk
 from tkinter import Frame, Label, Button, Text, filedialog, Menu
 from tkinter.messagebox import showinfo
@@ -109,12 +109,12 @@ class MainApp(tk.Tk):
 
     def run_click(self):
         ''' Main function to run zip folder creation and add desired files. '''
-
         # Get requested paths.
         self.fin_path = self.fin_text.get(1.0, 2.0)
         self.fout_path = self.fout_text.get(1.0, 2.0)
 
         # Create list from part number column of Excel sheet.
+        # Must be column A.
         # TODO: Find correct column in a more dynamic way.
         workbook = xlrd.open_workbook(self.fin_path.rstrip())
         worksheet = workbook.sheet_by_index(0)
@@ -137,7 +137,7 @@ class MainApp(tk.Tk):
                     is_match.append(self.src + fname)
 
         # Create zip folder and add files.
-        with zipfile.ZipFile(dst + "transfer.zip", "w", compression=zipfile.ZIP_DEFLATED) as zipf:
+        with z.ZipFile(dst + "transfer.zip", "w", compression=z.ZIP_DEFLATED) as zipf:
             for match in is_match:
                 zipf.write(match, basename(match))
 
@@ -146,7 +146,7 @@ class MainApp(tk.Tk):
         self.fin_text.delete(1.0, 2.0)
         self.fin_text.insert(1.0, "Select a file")
         self.fout_text.delete(1.0, 2.0)
-        self.fout_text.insert(1.0, "Select a Folder")
+        self.fout_text.insert(1.0, "Select a folder")
         self.src = "\\\\andros-dc\\groups\\ENG DATA\\ENG_Directory\\Attachments_Genius\\"
         self.search_label.config(text="Searching: " + self.src)
 
@@ -163,7 +163,17 @@ class MainApp(tk.Tk):
 
     def help_menu(self):
         ''' Application instructions pop-up window. '''
-        Instructions = "Insert instructions."
+        Instructions = dedent("""
+                        Input file must be .xlxs file with column A containing
+                        part numbers to search for matching .pdf file names.
+
+                        Output folder is the location for the output zip file
+                        to be stored.
+
+                        To change the search directory, select Search Location
+                        from the settings menu. The default is set to the 
+                        Genius attachments folder.
+                        """)
         showinfo("Help", Instructions)
 
 

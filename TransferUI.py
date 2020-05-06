@@ -1,7 +1,7 @@
 #---------------------------------------------------------------------#
 # Read basic Excel table of part numbers and match to filenames in
 # genius attachments folder, copy the files, then save in a new
-# directory on the desktop.
+# zip directory on the desktop.
 
 # Nicholas Gregg
 # 04/28/2020
@@ -17,6 +17,7 @@ from tkinter import Frame, Label, Button, Text, filedialog, Menu
 from tkinter.messagebox import showinfo
 
 
+# Class to create main application.
 class MainApp(tk.Tk):
     def __init__(self, main_win):
         # Main window
@@ -85,9 +86,9 @@ class MainApp(tk.Tk):
         # self.run_button.place(x=200, y=130)
         self.run_button.pack(side="bottom", pady=10)
 
-    # File search when input file browse button is clicked
-
+# Main application functions.
     def fin_click(self):
+        ''' Open file select dialog. '''
         self.fin_clicked = filedialog.askopenfilename()
 
         if self.fin_clicked == '':
@@ -97,6 +98,7 @@ class MainApp(tk.Tk):
             self.fin_text.insert(1.0, self.fin_clicked)
 
     def fout_click(self):
+        ''' Open folder select dialog. '''
         self.fout_clicked = filedialog.askdirectory()
 
         if self.fout_clicked == '':
@@ -106,10 +108,14 @@ class MainApp(tk.Tk):
             self.fout_text.insert(1.0, self.fout_clicked)
 
     def run_click(self):
+        ''' Main function to run zip folder creation and add desired files. '''
+
+        # Get requested paths.
         self.fin_path = self.fin_text.get(1.0, 2.0)
         self.fout_path = self.fout_text.get(1.0, 2.0)
 
-        # Create list from part number column
+        # Create list from part number column of Excel sheet.
+        # TODO: Find correct column in a more dynamic way.
         workbook = xlrd.open_workbook(self.fin_path.rstrip())
         worksheet = workbook.sheet_by_index(0)
         part_numbers = worksheet.col_values(0)
@@ -124,19 +130,19 @@ class MainApp(tk.Tk):
         dst = self.fout_path.rstrip() + "/"
         is_match = []
 
+        # Create list of files matching the part number list.
         for fname in os.listdir(self.src):
             for partno in part_numbers:
                 if fname.upper() == partno.upper():
-                    # copyfile(self.src + fname, dst + fname)
                     is_match.append(self.src + fname)
 
+        # Create zip folder and add files.
         with zipfile.ZipFile(dst + "transfer.zip", "w", compression=zipfile.ZIP_DEFLATED) as zipf:
             for match in is_match:
                 zipf.write(match, basename(match))
 
-    # Reset file selections.
-
     def new(self):
+        ''' Resets all parameters. '''
         self.fin_text.delete(1.0, 2.0)
         self.fin_text.insert(1.0, "Select a file")
         self.fout_text.delete(1.0, 2.0)
@@ -145,6 +151,8 @@ class MainApp(tk.Tk):
         self.search_label.config(text="Searching: " + self.src)
 
     def search_dir(self):
+        ''' Search directory for output files. '''
+        # TODO: Broaden the search tool to search child and parent directories.
         self.search_dir_clicked = filedialog.askdirectory()
 
         if self.search_dir_clicked == '':
@@ -153,15 +161,13 @@ class MainApp(tk.Tk):
             self.src = self.search_dir_clicked.rstrip() + "/"
             self.search_label.config(text="Searching: " + self.src)
 
-    # Application instructions pop-up window.
-
     def help_menu(self):
+        ''' Application instructions pop-up window. '''
         Instructions = "Insert instructions."
         showinfo("Help", Instructions)
 
+
 # Run program
-
-
 def main():
     root = tk.Tk()
     MainApp(root)

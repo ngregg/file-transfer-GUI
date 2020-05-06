@@ -8,9 +8,10 @@
 #---------------------------------------------------------------------#
 
 import os
+from os.path import basename
 import xlrd
 from shutil import copyfile
-from zipfile import ZipFile
+import zipfile
 import tkinter as tk
 from tkinter import Frame, Label, Button, Text, filedialog, Menu
 from tkinter.messagebox import showinfo
@@ -120,12 +121,18 @@ class MainApp(tk.Tk):
 
         # Search folder for matching names.
         # If match found, copy file to new zip folder.
-        dst = self.fout_path.rstrip() + "\\"
+        dst = self.fout_path.rstrip() + "/"
+        is_match = []
 
         for fname in os.listdir(self.src):
             for partno in part_numbers:
                 if fname.upper() == partno.upper():
-                    copyfile(self.src + fname, dst + fname)
+                    # copyfile(self.src + fname, dst + fname)
+                    is_match.append(self.src + fname)
+
+        with zipfile.ZipFile(dst + "transfer.zip", "w", compression=zipfile.ZIP_DEFLATED) as zipf:
+            for match in is_match:
+                zipf.write(match, basename(match))
 
     # Reset file selections.
 

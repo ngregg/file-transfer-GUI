@@ -157,7 +157,7 @@ class MainApp(tk.Tk):
 
         # Popup window to show results.
         matched = str(len(is_match)) + "/" + str(len(part_numbers))
-        unmatched = ' '.join([str(element) + "\n" for element in no_match])
+        unmatched = ''.join([str(element) + "\n" for element in no_match])
 
         if unmatched == '':
             unmatched = "None"

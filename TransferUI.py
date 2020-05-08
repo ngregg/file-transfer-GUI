@@ -118,7 +118,10 @@ class MainApp(tk.Tk):
         # TODO: Find correct column in a more dynamic way.
         workbook = xlrd.open_workbook(self.fin_path.rstrip())
         worksheet = workbook.sheet_by_index(0)
-        part_numbers = worksheet.col_values(0)
+        part_nums = worksheet.col_values(0)
+
+        # Remove column name.
+        part_numbers = part_nums[1:]
 
         # Add desired file extension.
         # TODO: Add selectable filetypes.
@@ -129,17 +132,40 @@ class MainApp(tk.Tk):
         # If match found, copy file to new zip folder.
         dst = self.fout_path.rstrip() + "/"
         is_match = []
+        no_match = []
+        files = []
 
         # Create list of files matching the part number list.
         for fname in os.listdir(self.src):
+            files.append(fname)
             for partno in part_numbers:
                 if fname.upper() == partno.upper():
                     is_match.append(self.src + fname)
 
-        # Create zip folder and add files.
+        # Make list comparison non case sensitive.
+        part_numbers = [element.upper() for element in part_numbers]
+        files = [element.upper() for element in files]
+
+        # Create list of non-matched part numbers.
+        for part in part_numbers:
+            if part not in files:
+                no_match.append(part)
+
         with z.ZipFile(dst + "transfer.zip", "w", compression=z.ZIP_DEFLATED) as zipf:
             for match in is_match:
                 zipf.write(match, basename(match))
+
+        # Popup window to show results.
+        matched = str(len(is_match)) + "/" + str(len(part_numbers))
+        unmatched = ' '.join([str(element) + "\n" for element in no_match])
+
+        if unmatched == '':
+            unmatched = "None"
+
+        showinfo("Results", matched +
+                 " Files matched\n\nFiles unmatched:\n\n" + unmatched)
+
+    # Reset file selections.
 
     def new(self):
         ''' Resets all parameters. '''
